@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skyveil — Weather</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+
+  <div id="sky-bg"></div>
+  <div id="particles"></div>
+
+  <div id="app">
+    <header>
+      <span class="logo">Skyveil</span>
+      <div class="search-wrap">
+        <input id="location-input" type="text" placeholder="Search city, zip code…" autocomplete="off" />
+        <button class="btn" id="search-btn">Search</button>
+        <button class="btn btn-ghost" id="gps-btn" title="Use my location">📍</button>
+      </div>
+      <div class="unit-toggle">
+        <button class="unit-btn active" id="unit-f">°F</button>
+        <button class="unit-btn" id="unit-c">°C</button>
+      </div>
+    </header>
+
+    <div id="loading">
+      <div class="spinner"></div>
+      <p class="loading-text">Fetching the skies…</p>
+    </div>
+
+    <div id="error-msg"></div>
+
+    <div id="main-card">
+      <div class="current-hero">
+        <div>
+          <div class="location-line" id="loc-name">—</div>
+          <div>
+            <span class="temp-big" id="cur-temp">—</span><span class="temp-big temp-unit" id="cur-unit">°F</span>
+          </div>
+          <div class="condition-label" id="cur-condition">—</div>
+          <div class="feels-like" id="cur-feels">—</div>
+        </div>
+        <div class="weather-icon-big" id="cur-icon">🌡️</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-label">Wind</div>
+          <div class="stat-value" id="stat-wind">—</div>
+          <div class="stat-sub" id="stat-wind-dir">Speed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Precipitation</div>
+          <div class="stat-value" id="stat-precip">—</div>
+          <div class="stat-sub" id="stat-precip-prob">Chance of rain</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Humidity</div>
+          <div class="stat-value" id="stat-humidity">—</div>
+          <div class="stat-sub">Relative moisture</div>
+        </div>
+      </div>
+
+      <div class="section-title">24-Hour Horizon Outlook</div>
+      <div class="hourly-scroll" id="hourly-container">
+        </div>
+
+      <div class="refresh-row">
+        <span class="updated-text" id="updated-time">Last updated: —</span>
+        <button class="btn btn-ghost" id="refresh-btn">Refresh Outlook</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/frontend/app.js"></script>
+</body>
+</html>
