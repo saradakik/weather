@@ -7,12 +7,18 @@ app.use(cors());
 
 const API_KEY = process.env.VISUAL_CROSSING_KEY;
 
-// SUPPORT MULTIPLE PATHS: 
-// Matches normal frontend calls, vercel functions, and stripped route paths smoothly.
-app.get(["/api/weather/:location", "/weather/:location", "/:location"], async (req, res) => {
+// Using a wildcard catch-all ('*') ensures that no matter what sub-path 
+// Vercel forwards to this file, Express will capture it.
+app.all("*", async (req, res) => {
     try {
-        const location = req.params.location;
-        // Capture the unit group passed by your app.js (?unitGroup=us or metric)
+        // Fallback checks to extract the location variable from the URL string safely
+        let location = req.params[0] || req.path.split("/").pop();
+        
+        // If the path parsing accidentally grabs "weather", clean it up
+        if (location === "weather" || !location) {
+            location = "London"; // Safe backup city
+        }
+
         const unitGroup = req.query.unitGroup || 'metric';
 
         const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(location)}?unitGroup=${unitGroup}&key=${API_KEY}&contentType=json`;
@@ -31,7 +37,6 @@ app.get(["/api/weather/:location", "/weather/:location", "/:location"], async (r
     }
 });
 
-// Avoid port binding lockups on Vercel production environments
 if (process.env.NODE_ENV !== 'production') {
     app.listen(3000, () => console.log("Local server running on port 3000"));
 }
