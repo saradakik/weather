@@ -1,44 +1,45 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
+// api/weather.js
+export default async function handler(req, res) {
+    // Handle CORS setup headers natively
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
 
-const app = express();
-app.use(cors());
-
-const API_KEY = process.env.VISUAL_CROSSING_KEY;
-
-// Using a wildcard catch-all ('*') ensures that no matter what sub-path 
-// Vercel forwards to this file, Express will capture it.
-app.all("*", async (req, res) => {
     try {
-        // Fallback checks to extract the location variable from the URL string safely
-        let location = req.params[0] || req.path.split("/").pop();
+        // Vercel automatically extracts wildcard tokens and queries into req.query
+        // It reads both /api/weather/:location and ?unitGroup=us effortlessly
+        const { location, unitGroup } = req.query;
         
-        // If the path parsing accidentally grabs "weather", clean it up
-        if (location === "weather" || !location) {
-            location = "London"; // Safe backup city
+        // Grab the key from Vercel's secure environment vault
+        const API_KEY = process.env.VISUAL_CROSSING_KEY;
+
+        if (!API_KEY) {
+            return res.status(500).json({ error: "Server Configuration Error: API Key missing." });
         }
 
-        const unitGroup = req.query.unitGroup || 'metric';
+        // Clean up fallback defaults if parameters match directory names
+        let targetLocation = location || req.url.split('/').pop().split('?')[0];
+        if (!targetLocation || targetLocation === "weather") {
+            targetLocation = "London";
+        }
 
-        const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(location)}?unitGroup=${unitGroup}&key=${API_KEY}&contentType=json`;
+        const units = unitGroup || 'metric';
+        const url = `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(targetLocation)}?unitGroup=${units}&key=${API_KEY}&contentType=json`;
 
         const response = await fetch(url);
         
         if (!response.ok) {
-            return res.status(response.status).json({ error: "Failed fetching data from Visual Crossing" });
+            return res.status(response.status).json({ error: `Visual Crossing API error: ${response.statusText}` });
         }
         
         const data = await response.json();
-        res.json(data);
+        return res.status(200).json(data);
+
     } catch (err) {
-        console.log("REAL ERROR:", err);
-        res.status(500).json({ error: "Failed to fetch weather" });
+        console.error("Runtime Crash:", err);
+        return res.status(500).json({ error: "Internal Server Error", details: err.message });
     }
-});
-
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(3000, () => console.log("Local server running on port 3000"));
 }
-
-module.exports = app;
