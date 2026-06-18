@@ -131,29 +131,28 @@ function fetchByGPS() {
 
 // Core Fetch Engine with safety checks
 async function fetchWeather(targetLocation) {
-  // 1. CRITICAL CHECK: If targetLocation is missing, empty, or undefined, do not call the API
   if (!targetLocation || targetLocation.trim() === "") {
     console.warn("Fetch blocked: Location string is empty.");
     return;
   }
-  
-  // Clean up user interface states
+
   errorEl.classList.remove('show');
   mainCardEl.classList.remove('visible');
   loadingEl.classList.add('show');
 
-  const unitsGroup = currentUnit === 'F' ? 'us' : 'metric';
-  const url = `http://localhost:3000/weather/${encodeURIComponent(targetLocation)}`;
-  const response = await fetch(url);
-  const data = await response.json;
-
   try {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error('Location not found. Please try a different city.');
+    const url = `/api/weather/${encodeURIComponent(targetLocation)}`;
     
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error('Location not found. Please try a different city.');
+    }
+
     const data = await response.json();
-    activeLocation = data.resolvedAddress; // Save the verified address
+
+    activeLocation = data.resolvedAddress;
     renderWeather(data);
+
   } catch (err) {
     errorEl.textContent = err.message;
     errorEl.classList.add('show');

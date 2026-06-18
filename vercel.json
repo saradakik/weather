@@ -1,0 +1,7 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/weather/:location", "destination": "/api/weather.js" },
+    { "source": "/(.*)", "destination": "/frontend/$1" }
+  ]
+}
