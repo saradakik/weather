@@ -1,5 +1,4 @@
 // Configuration
-
 let currentUnit = 'F'; // 'F' for US Imperial standard, 'C' for Metric system
 let activeLocation = '';
 
@@ -41,7 +40,7 @@ function renderWeather(data) {
 
   // Background and Atmospheric Particles
   const bg = document.getElementById('sky-bg');
-  bg.className = specs.theme;
+  if (bg) bg.className = specs.theme;
   generateAtmosphere(specs.particle);
 
   // Assign Core Hero Card Metrics
@@ -93,6 +92,7 @@ function renderWeather(data) {
 // Particle Canvas Generator
 function generateAtmosphere(char) {
   const container = document.getElementById('particles');
+  if (!container) return;
   container.innerHTML = '';
   const count = char === '✨' ? 25 : 60;
 
@@ -108,28 +108,7 @@ function generateAtmosphere(char) {
   }
 }
 
-// Location Retrieval via GPS
-function fetchByGPS() {
-  if (navigator.geolocation) {
-    loadingEl.classList.add('show');
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const query = `${position.coords.latitude},${position.coords.longitude}`;
-        fetchWeather(query);
-      },
-      (error) => {
-        console.warn("GPS failed or denied, using fallback city.");
-        fetchWeather('London'); // Standard text fallback when GPS fails
-      }
-    );
-  } else {
-    fetchWeather('London'); // Fallback for old browsers
-  }
-}
-// Unit Switches
-// ... Keep your variables, getWeatherSpecs, and generateAtmosphere functions exactly as they are at the top.
-
-// Core Fetch Engine with safety checks
+// Core Fetch Engine with Vercel URL parameters
 async function fetchWeather(targetLocation) {
   if (!targetLocation || targetLocation.trim() === "") {
     console.warn("Fetch blocked: Location string is empty.");
@@ -141,7 +120,11 @@ async function fetchWeather(targetLocation) {
   loadingEl.classList.add('show');
 
   try {
-    const url = `/api/weather/${encodeURIComponent(targetLocation)}`;
+    // Map system config to API parameter syntax
+    const unitsGroup = currentUnit === 'F' ? 'us' : 'metric';
+    
+    // Explicitly send unitGroup so the backend renders the correct scale!
+    const url = `/api/weather/${encodeURIComponent(targetLocation.trim())}?unitGroup=${unitsGroup}`;
     
     const response = await fetch(url);
     if (!response.ok) {
@@ -172,10 +155,9 @@ function fetchByGPS() {
       },
       (error) => {
         console.log("GPS denied or unavailable. Falling back to default city.");
-        // If the user blocks GPS, load a default city immediately so the screen isn't blank
         fetchWeather('London'); 
       },
-      { timeout: 5000 } // Give up after 5 seconds if GPS stalls
+      { timeout: 5000 }
     );
   } else {
     fetchWeather('London');
@@ -195,7 +177,6 @@ function setUnit(unit) {
     unitF.classList.remove('active');
   }
 
-  // Use what's in the input box first, otherwise use our last successful location
   const query = locationInput.value.trim() || activeLocation;
   if (query) {
     fetchWeather(query);
@@ -222,10 +203,10 @@ refreshBtn.addEventListener('click', () => {
   if (query) fetchWeather(query);
 });
 
+unitF.addEventListener('click', () => setUnit('F'));
+unitC.addEventListener('click', () => setUnit('C'));
+
 // Initialize on page load
 window.addEventListener('DOMContentLoaded', () => {
   fetchByGPS();
 });
-
-unitF.addEventListener('click', () => setUnit('F'));
-unitC.addEventListener('click', () => setUnit('C'));
