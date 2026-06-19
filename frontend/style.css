@@ -91,6 +91,7 @@ header {
   flex: 1; 
   display: flex; 
   gap: 8px; 
+  min-width: 0;
 }
 
 #location-input {
@@ -105,6 +106,7 @@ header {
   outline: none;
   transition: border-color 0.2s, background 0.2s;
   backdrop-filter: blur(10px);
+  min-width: 0;
 }
 
 #location-input::placeholder { color: var(--silver); }
@@ -329,9 +331,37 @@ header {
 .unit-btn.active { background: var(--amber); color: var(--midnight); }
 
 @media (max-width: 540px) {
-  #main-card { padding: 24px 20px; }
-  .current-hero { flex-direction: column; gap: 16px; }
-  .stats-row { grid-template-columns: 1fr; }
-  header { flex-wrap: wrap; }
-  .logo { width: 100%; }
+
+  header {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .logo {
+    width: 100%;
+    text-align: center;
+  }
+
+  .search-wrap {
+    width: 100%;
+  }
+
+  .unit-toggle {
+    align-self: center;
+  }
+
+  #main-card {
+    padding: 24px 20px;
+  }
+
+  .current-hero {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
 }
