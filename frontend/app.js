@@ -44,19 +44,27 @@ function renderWeather(data) {
   generateAtmosphere(specs.particle);
 
   // Assign Core Hero Card Metrics
-  // 1. Grab the full resolved address string
-const fullAddress = data.resolvedAddress;
+// Grab the address string from the API response
+const fullAddress = data.resolvedAddress || '';
 
-// 2. Clean it up: split by comma, filter out coordinates, and grab the first real name fragment
+// Split it into segments by commas
 const addressParts = fullAddress.split(',');
 let cityName = addressParts[0].trim();
 
-// If the first part is just a number/coordinate (like "40.7128"), grab the next part instead
-if ((/^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/).test(cityName) && addressParts[1]) {
-  cityName = addressParts[1].trim();
+// REGEX CHECK: If the city name is just a raw decimal/coordinate number (like "35.5111...")
+const isCoordinate = /^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/.test(cityName);
+
+if (isCoordinate) {
+  // If the first part was a coordinate, check if there's a real name in the next segment
+  if (addressParts[1] && !/^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/.test(addressParts[1].trim())) {
+    cityName = addressParts[1].trim();
+  } else {
+    // If no text segments exist at all, fall back to a generic friendly label
+    cityName = "Current Location";
+  }
 }
 
-// 3. Assign the clean city name to the element
+// Assign the clean city name to your element
 document.getElementById('loc-name').textContent = cityName;
   document.getElementById('cur-temp').textContent = Math.round(current.temp);
   document.getElementById('cur-unit').textContent = `°${currentUnit}`;
