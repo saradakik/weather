@@ -44,13 +44,26 @@ function renderWeather(data) {
   generateAtmosphere(specs.particle);
 
   // Assign Core Hero Card Metrics
-  document.getElementById('loc-name').textContent = data.resolvedAddress;
+  // 1. Grab the full resolved address string
+const fullAddress = data.resolvedAddress;
+
+// 2. Clean it up: split by comma, filter out coordinates, and grab the first real name fragment
+const addressParts = fullAddress.split(',');
+let cityName = addressParts[0].trim();
+
+// If the first part is just a number/coordinate (like "40.7128"), grab the next part instead
+if ((/^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/).test(cityName) && addressParts[1]) {
+  cityName = addressParts[1].trim();
+}
+
+// 3. Assign the clean city name to the element
+document.getElementById('loc-name').textContent = cityName;
   document.getElementById('cur-temp').textContent = Math.round(current.temp);
   document.getElementById('cur-unit').textContent = `°${currentUnit}`;
   document.getElementById('cur-condition').textContent = current.conditions;
   document.getElementById('cur-feels').textContent = `Feels like ${Math.round(current.feelslike)}°`;
   document.getElementById('cur-icon').textContent = specs.emoji;
-
+  
   // Stat Indicators
   const speedUnit = currentUnit === 'F' ? 'mph' : 'km/h';
   document.getElementById('stat-wind').textContent = `${Math.round(current.windspeed)} ${speedUnit}`;
