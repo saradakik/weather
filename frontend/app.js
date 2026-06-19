@@ -49,23 +49,19 @@ const fullAddress = data.resolvedAddress || '';
 
 // Split it into segments by commas
 const addressParts = fullAddress.split(',');
-let cityName = addressParts[0].trim();
 
-// REGEX CHECK: If the city name is just a raw decimal/coordinate number (like "35.5111...")
-const isCoordinate = /^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/.test(cityName);
+// 3. Filter out any parts that are just raw coordinate numbers
+const cleanParts = addressParts
+  .map(part => part.trim())
+  .filter(part => !/^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/.test(part));
 
-if (isCoordinate) {
-  // If the first part was a coordinate, check if there's a real name in the next segment
-  if (addressParts[1] && !/^[-+]?([0-9]*\.[0-9]+|[0-9]+)$/.test(addressParts[1].trim())) {
-    cityName = addressParts[1].trim();
-  } else {
-    // If no text segments exist at all, fall back to a generic friendly label
-    cityName = "Current Location";
-  }
-}
+// 4. Decide how specific you want to be:
+let finalLocationString = '';
 
-// Assign the clean city name to your element
-document.getElementById('loc-name').textContent = cityName;
+finalLocationString = cleanParts.join(', ');
+
+// 5. Update your HTML element
+  document.getElementById('loc-name').textContent = finalLocationString;
   document.getElementById('cur-temp').textContent = Math.round(current.temp);
   document.getElementById('cur-unit').textContent = `°${currentUnit}`;
   document.getElementById('cur-condition').textContent = current.conditions;
